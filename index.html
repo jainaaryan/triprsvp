@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>London 2026 — RSVP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #4a5568 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 44px 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+            text-align: center;
+            max-width: 440px;
+            width: 100%;
+            position: relative;
+            min-height: 360px;
+        }
+
+        .message {
+            color: #1e293b;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .line-1 {
+            opacity: 0;
+            animation: fadeIn 1.2s ease-out 0.8s forwards;
+        }
+
+        .line-2 {
+            opacity: 0;
+            animation: fadeIn 1.2s ease-out 2.2s forwards;
+        }
+
+        .line-3 {
+            opacity: 0;
+            animation: fadeIn 1.2s ease-out 3.6s forwards;
+            font-weight: 600;
+            margin-top: 28px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 14px 36px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+            opacity: 0;
+            animation: fadeIn 1.2s ease-out 5.0s forwards;
+        }
+
+        .yes-btn {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+            color: white;
+        }
+
+        .yes-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(30, 58, 95, 0.35);
+        }
+
+        .no-btn {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .no-btn.moving {
+            position: absolute;
+        }
+
+        .no-btn:hover {
+            background: #cbd5e1;
+            box-shadow: 0 6px 16px rgba(71, 85, 105, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="message line-1">We had an excellent time at London 2025.</p>
+        <p class="message line-2">So, it's only right that we plan for the next one.</p>
+        <p class="message line-3">Requesting your RSVP.</p>
+
+        <div class="buttons">
+            <button class="yes-btn" onclick="handleYes()">Yes</button>
+            <button class="no-btn" onclick="handleNo()">No</button>
+        </div>
+    </div>
+
+    <script>
+        function handleYes() {
+            window.location.href = 'yes.html';
+        }
+
+        // Touch/no-hover devices can't be teased by an escaping button,
+        // so on mobile a "No" tap turns both buttons into "Yes".
+        const isMobile = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+        function handleNo() {
+            if (isMobile) {
+                noBtn.textContent = 'Yes';
+                noBtn.classList.remove('no-btn');
+                noBtn.classList.add('yes-btn');
+                noBtn.onclick = handleYes;
+                yesBtn.onclick = handleYes;
+            }
+        }
+
+        const noBtn = document.querySelector('.no-btn');
+        const yesBtn = document.querySelector('.yes-btn');
+        const container = document.querySelector('.container');
+
+        if (!isMobile) {
+            noBtn.addEventListener('mouseenter', moveButton);
+        }
+
+        function moveButton() {
+            if (!noBtn.classList.contains('moving')) {
+                const noBtnRect = noBtn.getBoundingClientRect();
+                const yesBtnRect = yesBtn.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                yesBtn.style.position = 'absolute';
+                yesBtn.style.left = (yesBtnRect.left - containerRect.left) + 'px';
+                yesBtn.style.top = (yesBtnRect.top - containerRect.top) + 'px';
+
+                noBtn.style.left = (noBtnRect.left - containerRect.left) + 'px';
+                noBtn.style.top = (noBtnRect.top - containerRect.top) + 'px';
+                noBtn.classList.add('moving');
+            }
+
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            const padding = 20;
+            const maxX = container.offsetWidth - btnWidth - padding;
+            const maxY = container.offsetHeight - btnHeight - padding;
+            const minDistance = 150;
+
+            let newX, newY, attempts = 0;
+
+            do {
+                newX = Math.random() * (maxX - padding) + padding;
+                newY = Math.random() * (maxY - padding) + padding;
+                attempts++;
+
+                const currentX = parseFloat(noBtn.style.left) || 0;
+                const currentY = parseFloat(noBtn.style.top) || 0;
+                const distance = Math.sqrt(Math.pow(newX - currentX, 2) + Math.pow(newY - currentY, 2));
+
+                if (distance >= minDistance) break;
+            } while (attempts < 30);
+
+            noBtn.style.left = newX + 'px';
+            noBtn.style.top = newY + 'px';
+        }
+    </script>
+</body>
+</html>
